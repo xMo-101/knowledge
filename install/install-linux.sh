@@ -157,13 +157,13 @@ while [[ $# -gt 0 ]]; do
         -f|--force)     FORCE=true ;;
         -y|--yes)       YES=true ;;
         -s|--ssh)       LINK=$LINKSSH ;;
-        -p|--path)      DESTINATION="$2/"; shift ;;
+        -p|--path)      DESTINATION="$2"; shift ;;
         *) error "Unknown option: $1"; usage; exit 1 ;;
     esac
     shift
 done
 
-TARGET="${DESTINATION}${VERSION}"
+TARGET="${DESTINATION}/${VERSION}"
 
 ########## SCRIPT ##########
 echo ""
