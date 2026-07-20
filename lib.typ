@@ -1,2 +1,2 @@
 // Importing the public function
-#import "src/orionotes.typ": orionotes
+#import "src/knowledge.typ": knowledge

@@ -1,7 +1,7 @@
 // LTeX: language=en
 #import "utils.typ": *
 
-#let orionotes(
+#let knowledge(
   // The language of the work.
   // NOTE: If you change this consider changing also the following
   // parameters and set them into the language of your choice:
@@ -10,22 +10,12 @@
   //  - top-sec-name
   language: "en",
   // The title of the work.
-  title: [Course title],
+  title: [Title],
+  subtitle: [Subtitle],
   // The authors of the work. This should be an array (also if there is just one).
-  authors: ("Student 1",),
-  // The professors of the course. This should be an array (also if there is just one).
-  // Set to none if you don't want to show it.
-  professors: ("Professor 1",),
-  // The university where the course took place. Set to none to disable.
-  university: [University of Turin UniTo],
-  // The degree of the course. Set to none to disable.
-  degree: [Master degree in Astrophysics],
+  authors: ("Person 1",),
   // The date of the work. Set to none to disable.
-  date: "Academic Year",
-  // What to write before the authors (the semicolon is not needed).
-  pre-authors: (sing:"Author", plur:"Authors"),
-  // What to write before the professors (the semicolon is not needed).
-  pre-professors: (sing:"Professor", plur:"Professors"),
+  date: "Year/none",
   // The typographic name of the level 1 section.
   // TODO: Check the language dependency.
   top-section-name: "Chapter",
@@ -46,10 +36,10 @@
   // Should be a call to `bibliography` (e.g. `bibliography("refs.bib")`) or `none`
   bib: none,
   // The content of the work
-  body
+  body,
 ) = {
   set document(title: title, author: authors)
-  set text(font: "New Computer Modern", size: 11pt, lang: language)
+  set text(font: "Open Sans", size: 11pt, lang: language)
   set page(paper: "a4", margin: auto)
 
   // Front page
@@ -57,31 +47,31 @@
     align(
       center + horizon,
       block(width: 90%)[
+        #line(length: 110%, stroke: 2pt + black) // top line
         #let v-space = v(2em, weak: true)
+
         #text(3em)[*#title*]
 
         #v-space
-        #align(left)[
-          #text(1.6em)[#get-auth-str(authors, pre-authors)]\
-          #text(1.6em)[#get-prof-str(professors, pre-professors)]
-        ]
 
-        #if front-image!=none {
-          v-space
-          front-image
-        } else {
-          line(length: 100%)
-        }
+        #text(2em)[#subtitle]
 
-        #if university!="" or degree!= "" {
-          v-space
-          text(1.3em)[#university\ #degree]
-        }
+        #v-space
+
+        #text(1.5em)[#get-auth-str(authors)]\
 
         #if date != none {
           v-space
           text(1.2em, date)
         }
+
+        #if front-image != none {
+          v-space
+          front-image
+        }
+
+        #v-space
+        #line(length: 110%, stroke: 2pt + black) // bottom line
       ],
     ),
   )
@@ -89,8 +79,7 @@
   // Paragraph settings
   set par(justify: true)
   show link: it => {
-    if type(it.dest) != str {it}
-    else {
+    if type(it.dest) != str { it } else {
       set text(blue)
       underline(it)
     }
@@ -98,8 +87,6 @@
 
   // Preface page settings
   set page(numbering: "i")
-
-  show heading: set text(hyphenate: false) // Don't hyphenate headings
 
   // Preface
   if preface != none {
@@ -119,23 +106,23 @@
     header: context {
       let phys-page = here().page()
       let is-odd = calc.odd(phys-page)
-      let alignment = if is-odd {right} else {left}
+      let alignment = if is-odd { right } else { left }
 
       // NOTE: If there are also parts level should be 2
-      let chap-heading = heading.where(level: 1)
+      let chapter-heading = heading.where(level: 1)
 
-      // Using only the page where there are chapter headins
-      if query(chap-heading).any(it => it.location().page() == phys-page) { return }
+      // Using only the page where there are chapter headings
+      if query(chapter-heading).any(item => item.location().page() == phys-page) { return }
 
       // Find the chapter of the section we are currently in.
-      let chap-before = query(chap-heading.before(here()))
-      if chap-before.len() > 0 {
-        let current-chap = chap-before.last()
-        let chapter-title = upper(current-chap.body)
-        let chapter-number = counter(chap-heading).display()
+      let chapter-before = query(chapter-heading.before(here()))
+      if chapter-before.len() > 0 {
+        let current-chapter = chapter-before.last()
+        let chapter-title = upper(current-chapter.body)
+        let chapter-number = counter(chapter-heading).display()
         let chapter-string = [#chapter-number #chapter-title]
         if chapter-number != none {
-          align(alignment, text(size: 0.68em, chapter-string))
+          align(alignment, text(size: 0.75em, chapter-string))
         }
       }
     },
@@ -145,19 +132,21 @@
   counter(page).update(1)
 
   // Per chapter equations
-  set math.equation(numbering: it => {
+  set math.equation(numbering: item => {
     let chapter-count = counter(heading).get().first()
-    numbering("(1.1)", chapter-count, it)
+    numbering("(1.1)", chapter-count, item)
   })
 
   // Break large tables across pages.
   show figure.where(kind: table): set block(breakable: true)
   set table(
-    // Increase the table cell's padding
     inset: 7pt, // default is 5pt
     stroke: (0.5pt + luma(200)),
   )
-  show table.cell.where(y: 0): smallcaps // Use smallcaps for table header row.
+  // show table.cell.where(y: 0): text.with(weight: 700) // Use smallcaps for table header row.
+
+  show table.cell.where(y:0): smallcaps
+  show table.cell.where(y:0): text.with(font:"Montserrat", weight:700)
 
   // Body. Wrapped so set rules apply only to it
   {
@@ -168,7 +157,7 @@
       counter(math.equation).update(0)
       let header = smallcaps[#top-section-name #counter(heading).display("1")]
       [
-        #text(1em, header)
+        #text(1em, header, font: "Montserrat")
         #v(1em, weak: true)
         #text(1.4em)[#it.body]
         #v(1.5em, weak: true)
@@ -209,5 +198,4 @@
     show bibliography: set par(leading: 0.65em, justify: false, linebreaks: auto)
     bib
   }
-
 }
